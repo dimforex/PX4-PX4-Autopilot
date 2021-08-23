@@ -159,6 +159,7 @@ px4_add_module(
 		sensors/gyro.cpp
 		sensors/cbat.cpp
 		sensors/ice_status.cpp
+		sensors/fuel_tank_status.cpp
 
 	DEPENDS
 		px4_uavcan_dsdlc
