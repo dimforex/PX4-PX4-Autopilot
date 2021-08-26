@@ -46,7 +46,7 @@ px4_add_board(
 		pwm_out
 		px4io
 		rc_input
-		roboclaw
+		# roboclaw
 		rpm
 		safety_button
 		smart_battery/batmon
