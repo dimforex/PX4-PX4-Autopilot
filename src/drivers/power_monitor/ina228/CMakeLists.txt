@@ -1,6 +1,6 @@
 ############################################################################
 #
-#   Copyright (c) 2015-2017 PX4 Development Team. All rights reserved.
+#   Copyright (c) 2021 PX4 Development Team. All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without
 # modification, are permitted provided that the following conditions
@@ -30,53 +30,15 @@
 # POSSIBILITY OF SUCH DAMAGE.
 #
 ############################################################################
-
-px4_add_git_submodule(TARGET git_mavlink_v2 PATH "${PX4_SOURCE_DIR}/mavlink/include/mavlink/v2.0")
-
 px4_add_module(
-	MODULE modules__mavlink
-	MAIN mavlink
+	MODULE drivers__ina228
+	MAIN ina228
 	COMPILE_FLAGS
 		-Wno-cast-align # TODO: fix and enable
-		-Wno-address-of-packed-member # TODO: fix in c_library_v2
-		-Wno-enum-compare # ROTATION <-> MAV_SENSOR_ROTATION
-		#-DDEBUG_BUILD
-	INCLUDES
-		${PX4_SOURCE_DIR}/mavlink/include/mavlink
 	SRCS
-		mavlink.c
-		mavlink_command_sender.cpp
-		mavlink_events.cpp
-		mavlink_ftp.cpp
-		mavlink_log_handler.cpp
-		mavlink_main.cpp
-		mavlink_messages.cpp
-		mavlink_mission.cpp
-		mavlink_parameters.cpp
-		mavlink_rate_limiter.cpp
-		mavlink_receiver.cpp
-		mavlink_shell.cpp
-		mavlink_simple_analyzer.cpp
-		mavlink_stream.cpp
-		mavlink_timesync.cpp
-		mavlink_ulog.cpp
-		tune_publisher.cpp
-	MODULE_CONFIG
-		module.yaml
+		ina228_main.cpp
+		ina228.cpp
 	DEPENDS
-		airspeed
-		component_general_json # for checksums.h
-		drivers_accelerometer
-		drivers_barometer
-		drivers_gyroscope
-		drivers_magnetometer
-		git_mavlink_v2
-		conversion
-		geo
-		version
-	UNITY_BUILD
+		battery
+		px4_work_queue
 	)
-
-if(PX4_TESTING)
-	add_subdirectory(mavlink_tests)
-endif()
