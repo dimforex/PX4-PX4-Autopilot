@@ -47,7 +47,7 @@ px4_add_board(
 		pwm_out
 		px4io
 		rc_input
-		# roboclaw
+		#roboclaw
 		rpm
 		safety_button
 		#smart_battery/batmon
@@ -92,15 +92,15 @@ px4_add_board(
 	SYSTEMCMDS
 		bl_update
 		dmesg
-		dumpfile
-		esc_calib
-		gpio
+		#dumpfile
+		#esc_calib
+		#gpio
 		hardfault_log
 		i2cdetect
 		led_control
 		mft
 		mixer
-		motor_ramp
+		#motor_ramp
 		motor_test
 		mtd
 		nshterm
