@@ -108,14 +108,11 @@ private:
 
 	hrt_abstime	_time_stamp_last_loop{0};		/**< time stamp of last loop iteration */
 
-	int _task_failure_count{0};         /**< counter for task failures */
-
 	vehicle_local_position_setpoint_s _setpoint {};
 	vehicle_control_mode_s _vehicle_control_mode {};
 
 	vehicle_constraints_s _vehicle_constraints {
 		.timestamp = 0,
-		.speed_xy = NAN,
 		.speed_up = NAN,
 		.speed_down = NAN,
 		.want_takeoff = false,
@@ -123,7 +120,6 @@ private:
 
 	vehicle_land_detected_s _vehicle_land_detected {
 		.timestamp = 0,
-		.alt_max = -1.0f,
 		.freefall = false,
 		.ground_contact = true,
 		.maybe_landed = true,
@@ -141,7 +137,9 @@ private:
 		(ParamFloat<px4::params::MPC_Z_VEL_I_ACC>)  _param_mpc_z_vel_i_acc,
 		(ParamFloat<px4::params::MPC_Z_VEL_D_ACC>)  _param_mpc_z_vel_d_acc,
 		(ParamFloat<px4::params::MPC_XY_VEL_MAX>)   _param_mpc_xy_vel_max,
+		(ParamFloat<px4::params::MPC_Z_V_AUTO_UP>)  _param_mpc_z_v_auto_up,
 		(ParamFloat<px4::params::MPC_Z_VEL_MAX_UP>) _param_mpc_z_vel_max_up,
+		(ParamFloat<px4::params::MPC_Z_V_AUTO_DN>)  _param_mpc_z_v_auto_dn,
 		(ParamFloat<px4::params::MPC_Z_VEL_MAX_DN>) _param_mpc_z_vel_max_dn,
 		(ParamFloat<px4::params::MPC_TILTMAX_AIR>)  _param_mpc_tiltmax_air,
 		(ParamFloat<px4::params::MPC_THR_HOVER>)    _param_mpc_thr_hover,
@@ -222,13 +220,6 @@ private:
 	 * Check for validity of positon/velocity states.
 	 */
 	PositionControlStates set_vehicle_states(const vehicle_local_position_s &local_pos);
-
-	/**
-	 * Adjust the setpoint during landing.
-	 * Thrust is adjusted to support the land-detector during detection.
-	 * @param setpoint gets adjusted based on land-detector state
-	 */
-	void limit_thrust_during_landing(vehicle_attitude_setpoint_s &setpoint);
 
 	/**
 	 * Failsafe.

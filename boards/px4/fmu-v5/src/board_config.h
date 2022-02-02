@@ -173,18 +173,10 @@
 	 (1 << ADC1_SPARE_1_CHANNEL))
 #endif
 
-/* Define Battery 1 Voltage Divider and A per V
- */
-
-#define BOARD_BATTERY1_V_DIV         (18.1f)     /* measured with the provided PM board */
-#define BOARD_BATTERY1_A_PER_V       (36.367515152f)
-
 /* HW has to large of R termination on ADC todo:change when HW value is chosen */
-
 #define BOARD_ADC_OPEN_CIRCUIT_V     (5.6f)
 
 /* HW Version and Revision drive signals Default to 1 to detect */
-
 #define BOARD_HAS_HW_VERSIONING
 
 #define GPIO_HW_REV_DRIVE    /* PH14  */ (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_2MHz|GPIO_OUTPUT_SET|GPIO_PORTH|GPIO_PIN14)
@@ -212,22 +204,6 @@
 #define HEATER_OUTPUT_EN(on_true)              px4_arch_gpiowrite(GPIO_HEATER_OUTPUT, (on_true))
 
 
-/* PWM Capture
- *
- * 3  PWM Capture inputs are configured.
- *
- * Pins:
- *
- * FMU_CAP1 : PA5  : TIM2_CH1
- * FMU_CAP2 : PB3  : TIM2_CH2
- * FMU_CAP3 : PB11 : TIM2_CH4
- */
-#define GPIO_TIM2_CH1_IN     /* PA5   T22C1  FMU_CAP1 */ GPIO_TIM2_CH1IN_3
-#define GPIO_TIM2_CH2_IN     /* PB3   T22C2  FMU_CAP2 */ GPIO_TIM2_CH2IN_2
-#define GPIO_TIM2_CH4_IN     /* PB11  T22C4  FMU_CAP3 */ GPIO_TIM2_CH4IN_2
-
-#define DIRECT_PWM_CAPTURE_CHANNELS  3
-
 /* PI0 is nARMED
  *  The GPIO will be set as input while not armed HW will have external HW Pull UP.
  *  While armed it shall be configured at a GPIO OUT set LOW
@@ -239,7 +215,7 @@
 
 /* PWM
  */
-#define DIRECT_PWM_OUTPUT_CHANNELS  8
+#define DIRECT_PWM_OUTPUT_CHANNELS  11
 
 #define BOARD_HAS_LED_PWM              1
 #define BOARD_LED_PWM_DRIVE_ACTIVE_LOW 1
@@ -263,7 +239,7 @@
 #define GPIO_nVDD_5V_PERIPH_EN          /* PG4  */ (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_2MHz|GPIO_OUTPUT_SET|GPIO_PORTG|GPIO_PIN4)
 #define GPIO_nVDD_5V_PERIPH_OC          /* PE15 */ (GPIO_INPUT |GPIO_FLOAT|GPIO_PORTE|GPIO_PIN15)
 #define GPIO_nVDD_5V_HIPOWER_EN         /* PF12 */ (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_2MHz|GPIO_OUTPUT_SET|GPIO_PORTF|GPIO_PIN12)
-#define GPIO_nVDD_5V_HIPOWER_OC         /* PG13 */ (GPIO_INPUT |GPIO_FLOAT|GPIO_PORTF|GPIO_PIN13)
+#define GPIO_nVDD_5V_HIPOWER_OC         /* PF13 */ (GPIO_INPUT |GPIO_FLOAT|GPIO_PORTF|GPIO_PIN13)
 #define GPIO_VDD_3V3_SPEKTRUM_POWER_EN  /* PE4  */ (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_2MHz|GPIO_OUTPUT_CLEAR|GPIO_PORTE|GPIO_PIN4)
 #define GPIO_VDD_3V3_SPEKTRUM_PASSIVE   /* PE4  */ (GPIO_INPUT|GPIO_PULLUP|GPIO_PORTE|GPIO_PIN4)
 #define GPIO_VDD_5V_RC_EN               /* PG5  */ (GPIO_OUTPUT|GPIO_PUSHPULL|GPIO_SPEED_2MHz|GPIO_OUTPUT_CLEAR|GPIO_PORTG|GPIO_PIN5)
@@ -309,19 +285,6 @@
 #define RC_SERIAL_PORT                     "/dev/ttyS4"
 #define RC_SERIAL_SINGLEWIRE
 #define BOARD_SUPPORTS_RC_SERIAL_PORT_OUTPUT
-
-/* Input Capture Channels. */
-#define INPUT_CAP1_TIMER                  2
-#define INPUT_CAP1_CHANNEL     /* T4C1 */ 1
-#define GPIO_INPUT_CAP1        /*  PA5 */ GPIO_TIM2_CH1_IN
-
-#define INPUT_CAP2_TIMER                  2
-#define INPUT_CAP2_CHANNEL     /* T4C2 */ 2
-#define GPIO_INPUT_CAP2        /*  PB3 */ GPIO_TIM2_CH2_IN
-
-#define INPUT_CAP3_TIMER                  2
-#define INPUT_CAP3_CHANNEL     /* T4C4 */ 4
-#define GPIO_INPUT_CAP3        /* PB11 */ GPIO_TIM2_CH4_IN
 
 /* PWM input driver. Use FMU AUX5 pins attached to timer4 channel 2 */
 #define PWMIN_TIMER                       4
@@ -470,7 +433,6 @@
 
 #define BOARD_NUM_IO_TIMERS 5
 
-#define BOARD_DSHOT_MOTOR_ASSIGNMENT {3, 2, 1, 0, 4, 5, 6, 7};
 
 __BEGIN_DECLS
 

@@ -104,7 +104,7 @@ PWMSim::ioctl(device::file_t *filp, int cmd, unsigned long arg)
 			struct pwm_output_values *pwm = (struct pwm_output_values *)arg;
 
 			for (unsigned i = 0; i < pwm->channel_count; i++) {
-				if (i < OutputModuleInterface::MAX_ACTUATORS) {
+				if (i < OutputModuleInterface::MAX_ACTUATORS && !_mixing_output.useDynamicMixing()) {
 					_mixing_output.minValue(i) = pwm->values[i];
 				}
 			}
@@ -116,7 +116,7 @@ PWMSim::ioctl(device::file_t *filp, int cmd, unsigned long arg)
 			struct pwm_output_values *pwm = (struct pwm_output_values *)arg;
 
 			for (unsigned i = 0; i < pwm->channel_count; i++) {
-				if (i < OutputModuleInterface::MAX_ACTUATORS) {
+				if (i < OutputModuleInterface::MAX_ACTUATORS && !_mixing_output.useDynamicMixing()) {
 					_mixing_output.maxValue(i) = pwm->values[i];
 				}
 			}
@@ -170,17 +170,6 @@ PWMSim::ioctl(device::file_t *filp, int cmd, unsigned long arg)
 
 			for (unsigned i = 0; i < OutputModuleInterface::MAX_ACTUATORS; i++) {
 				pwm->values[i] = _mixing_output.minValue(i);
-			}
-
-			pwm->channel_count = OutputModuleInterface::MAX_ACTUATORS;
-			break;
-		}
-
-	case PWM_SERVO_GET_TRIM_PWM: {
-			struct pwm_output_values *pwm = (struct pwm_output_values *)arg;
-
-			for (unsigned i = 0; i < OutputModuleInterface::MAX_ACTUATORS; i++) {
-				pwm->values[i] = (_mixing_output.maxValue(i) + _mixing_output.minValue(i)) / 2;
 			}
 
 			pwm->channel_count = OutputModuleInterface::MAX_ACTUATORS;
