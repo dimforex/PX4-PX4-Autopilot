@@ -166,6 +166,7 @@ px4_add_module(
 		sensors/gyro.cpp
 		sensors/ice_status.cpp
 		sensors/hygrometer.cpp
+		sensors/fuel_tank_status.cpp
 
 	MODULE_CONFIG
 		module.yaml

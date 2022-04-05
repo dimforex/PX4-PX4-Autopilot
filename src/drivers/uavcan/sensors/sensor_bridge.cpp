@@ -44,6 +44,7 @@
 #include "battery.hpp"
 #include "differential_pressure.hpp"
 #include "flow.hpp"
+#include "fuel_tank_status.hpp"
 #include "gnss.hpp"
 #include "gyro.hpp"
 #include "hygrometer.hpp"
@@ -94,6 +95,15 @@ void IUavcanSensorBridge::make_all(uavcan::INode &node, List<IUavcanSensorBridge
 
 	if (uavcan_sub_flow != 0) {
 		list.add(new UavcanFlowBridge(node));
+	}
+
+
+	// fuel tank
+	int32_t uavcan_sub_fuel = 1;
+	param_get(param_find("UAVCAN_SUB_FUEL"), &uavcan_sub_fuel);
+
+	if (uavcan_sub_fuel != 0) {
+		list.add(new UavcanFuelTankStatusBridge(node));
 	}
 
 	// GPS
