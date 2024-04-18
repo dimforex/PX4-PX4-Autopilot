@@ -1,0 +1,6 @@
+menuconfig MODULES_ACKERMANN_DRIVE
+	bool "ackermann_drive"
+	default n
+	depends on MODULES_CONTROL_ALLOCATOR
+	---help---
+		Enable support for control of differential drive rovers
