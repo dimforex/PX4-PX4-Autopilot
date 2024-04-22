@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- *   Copyright (c) 2023 PX4 Development Team. All rights reserved.
+ *   Copyright (c) 2024 PX4 Development Team. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -54,10 +54,6 @@
 // Local includes
 #include "AckermannDriveControl/AckermannDriveControl.hpp"
 #include "AckermannDriveGuidance/AckermannDriveGuidance.hpp"
-
-// Defines for nav state
-#define VEHICLE_STATUS_NAVIGATION_STATE_MANUAL 0
-#define VEHICLE_STATUS_NAVIGATION_STATE_AUTO_MISSION 3
 
 using namespace time_literals;
 

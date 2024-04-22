@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- *   Copyright (c) 2023-2024 PX4 Development Team. All rights reserved.
+ *   Copyright (c) 2024 PX4 Development Team. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -205,15 +205,14 @@ float AckermannDriveGuidance::calcDesiredHeading(Vector2f const &curr_wp_local, 
 	float a = -line_segment_slope;
 	float c = -line_segment_rover_offset;
 	float r = lookahead_distance;
-	float EPS = 1.0E-3;
 	float x0 = -a * c / (a * a + 1.0f);
 	float y0 = -c / (a * a + 1.0f);
 
 	// Calculate intersection points
-	if (c * c > r * r * (a * a + 1.0f) + EPS) { // No intersection points exist
+	if (c * c > r * r * (a * a + 1.0f) + FLT_EPSILON) { // No intersection points exist
 		return 0.f;
 
-	} else if (abs(c * c - r * r * (a * a + 1.0f)) < EPS) { // One intersection point exists
+	} else if (abs(c * c - r * r * (a * a + 1.0f)) < FLT_EPSILON) { // One intersection point exists
 		return atan2f(y0, x0);
 
 	} else { // Two intersetion points exist

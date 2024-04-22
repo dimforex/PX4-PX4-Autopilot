@@ -1,6 +1,6 @@
 /****************************************************************************
  *
- *   Copyright (c) 2023 PX4 Development Team. All rights reserved.
+ *   Copyright (c) 2024 PX4 Development Team. All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
@@ -68,7 +68,7 @@ void AckermannDriveControl::actuatorControl()
 	// Speed control
 	if (fabsf(_ackermann_drive_setpoint.speed) < 0.01f) { // Stop
 		_speed = 0.f;
-		_steering = 0.f;
+		_steering = _ackermann_drive_setpoint.steering;
 
 	} else if (_ackermann_drive_setpoint.manual) { // Manual mode
 		_speed = _ackermann_drive_setpoint.speed;

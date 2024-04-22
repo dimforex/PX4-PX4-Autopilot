@@ -72,7 +72,7 @@ void AckermannDrive::Run()
 
 	// Navigation modes
 	switch (_vehicle_status.nav_state) {
-	case VEHICLE_STATUS_NAVIGATION_STATE_MANUAL: // Manual mode
+	case vehicle_status_s::NAVIGATION_STATE_MANUAL: // Manual mode
 		if (_manual_control_setpoint_sub.updated()) {
 			ackermann_drive_setpoint_s _ackermann_drive_setpoint{};
 			manual_control_setpoint_s manual_control_setpoint{};
@@ -88,7 +88,7 @@ void AckermannDrive::Run()
 
 		break;
 
-	case VEHICLE_STATUS_NAVIGATION_STATE_AUTO_MISSION: // Mission mode
+	case vehicle_status_s::NAVIGATION_STATE_AUTO_MISSION: // Mission mode
 		_ackermann_drive_guidance.purePursuit();
 		break;
 
