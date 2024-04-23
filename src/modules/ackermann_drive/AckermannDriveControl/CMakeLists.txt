@@ -35,4 +35,5 @@ px4_add_library(AckermannDriveControl
 	AckermannDriveControl.cpp
 )
 
+target_link_libraries(AckermannDriveControl PUBLIC pid)
 target_include_directories(AckermannDriveControl PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
