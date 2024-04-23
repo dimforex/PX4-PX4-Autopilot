@@ -140,10 +140,10 @@ void AckermannDriveGuidance::purePursuit()
 
 			// Calculate desired heading towards lookahead point
 			float desired_heading = 0.f;
-			float lookahead_distance = math::constrain<float>(_param_ad_lookahead_tun.get() * _desired_speed,
+			float lookahead_distance = math::constrain(_param_ad_lookahead_tun.get() * _desired_speed,
 						   _param_ad_lookahead_min.get(), _param_ad_lookahead_max.get());
 
-			if (crosstrack_error.length() > lookahead_distance) { // Crosstrack error larger than lookahead
+			if (crosstrack_error.longerThan(lookahead_distance)) {
 				if (crosstrack_error.length() < _param_ad_lookahead_max.get()) {
 					lookahead_distance = 1.1f * crosstrack_error.length(); // Scale lookahead radius
 					desired_heading = calcDesiredHeading(_curr_wp_local, _prev_wp_local, _curr_pos_local, lookahead_distance);

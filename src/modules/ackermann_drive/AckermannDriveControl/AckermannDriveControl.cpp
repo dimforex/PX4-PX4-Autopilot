@@ -66,7 +66,7 @@ void AckermannDriveControl::actuatorControl()
 	_time_stamp_last = now;
 
 	// Speed control
-	if (math::abs_t(_ackermann_drive_setpoint.speed) < 0.01f) { // Stop
+	if (fabsf(_ackermann_drive_setpoint.speed) < 0.01f) { // Stop
 		_speed = 0.f;
 		_steering = 0.f;
 
