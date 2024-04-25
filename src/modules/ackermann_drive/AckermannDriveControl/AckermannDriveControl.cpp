@@ -56,9 +56,7 @@ void AckermannDriveControl::updateParams()
 void AckermannDriveControl::actuatorControl()
 {
 	// uORB subscriber updates
-	if (_ackermann_drive_setpoint_sub.updated()) {
-		_ackermann_drive_setpoint_sub.copy(&_ackermann_drive_setpoint);
-	}
+	_ackermann_drive_setpoint_sub.update(&_ackermann_drive_setpoint);
 
 	// Timestamps
 	hrt_abstime now = hrt_absolute_time();

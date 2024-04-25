@@ -91,8 +91,8 @@ public:
 	 * @param curr_pos_local Current position of the vehicle in local frame.
 	 * @param lookahead_distance Radius of circle around vehicle.
 	 */
-	float calcDesiredHeading(Vector2f const &curr_wp_local, Vector2f const &prev_wp_local, Vector2f const &curr_pos_local,
-				 float const &lookahead_distance);
+	float calcDesiredHeading(const Vector2f &curr_wp_local, const Vector2f &prev_wp_local, const Vector2f &curr_pos_local,
+				 const float &lookahead_distance);
 
 	/**
 	 * @brief Publishes the  acceptance radius for current waypoint based on the angle between a line segment
@@ -140,8 +140,8 @@ private:
 	Vector2d _curr_pos{};
 	Vector2f _curr_pos_local{};
 	float _vehicle_yaw{0.f};
-	float _desired_speed;
-	float _desired_steering;
+	float _desired_speed{0.f};
+	float _desired_steering{0.f};
 
 	// Waypoint variables
 	Vector2d _curr_wp{};
@@ -150,7 +150,7 @@ private:
 	Vector2f _curr_wp_local{};
 	Vector2f _prev_wp_local{};
 	Vector2f _next_wp_local{};
-	float _prev_acc_rad;
+	float _prev_acc_rad{0.f};
 
 	// Parameters
 	DEFINE_PARAMETERS(

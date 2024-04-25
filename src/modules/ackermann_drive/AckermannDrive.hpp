@@ -91,7 +91,7 @@ private:
 	uORB::Subscription _vehicle_status_sub{ORB_ID(vehicle_status)};
 	vehicle_status_s _vehicle_status{};
 
-	// uORB sublications
+	// uORB publications
 	uORB::Publication<ackermann_drive_setpoint_s> _ackermann_drive_setpoint_pub{ORB_ID(ackermann_drive_setpoint)};
 
 	// Instances

@@ -66,9 +66,7 @@ void AckermannDrive::Run()
 		updateParams();
 	}
 
-	if (_vehicle_status_sub.updated()) {
-		_vehicle_status_sub.copy(&_vehicle_status);
-	}
+	_vehicle_status_sub.update(&_vehicle_status);
 
 	// Navigation modes
 	switch (_vehicle_status.nav_state) {

@@ -45,36 +45,20 @@ AckermannDriveGuidance::AckermannDriveGuidance(ModuleParams *parent) : ModulePar
 void AckermannDriveGuidance::purePursuit()
 {
 	// uORB subscriber updates
+	_position_controller_status_sub.update(&_position_controller_status);
+	_vehicle_global_position_sub.update(&_vehicle_global_position);
+	_home_position_sub.update(&_home_position);
+	_local_position_sub.update(&_local_position);
+	_mission_result_sub.update(&_mission_result);
+
 	if (_position_setpoint_triplet_sub.updated()) {
 		_prev_acc_rad = _position_controller_status.acceptance_radius;
 		_position_setpoint_triplet_sub.copy(&_position_setpoint_triplet);
 	}
 
-	if (_position_controller_status_sub.updated()) {
-		_position_controller_status_sub.copy(&_position_controller_status);
-	}
-
-	if (_vehicle_global_position_sub.updated()) {
-		_vehicle_global_position_sub.copy(&_vehicle_global_position);
-	}
-
-	if (_vehicle_attitude_sub.updated()) {
-		if (_vehicle_attitude_sub.copy(&_vehicle_attitude)) {
-			matrix::Quatf _vehicle_attitude_quaternion = Quatf(_vehicle_attitude.q);
-			_vehicle_yaw = matrix::Eulerf(_vehicle_attitude_quaternion).psi();
-		}
-	}
-
-	if (_home_position_sub.updated()) {
-		_home_position_sub.copy(&_home_position);
-	}
-
-	if (_local_position_sub.updated()) {
-		_local_position_sub.copy(&_local_position);
-	}
-
-	if (_mission_result_sub.updated()) {
-		_mission_result_sub.copy(&_mission_result);
+	if (_vehicle_attitude_sub.update(&_vehicle_attitude)) {
+		matrix::Quatf _vehicle_attitude_quaternion = Quatf(_vehicle_attitude.q);
+		_vehicle_yaw = matrix::Eulerf(_vehicle_attitude_quaternion).psi();
 	}
 
 	if (!_global_local_proj_ref.isInitialized()
@@ -83,10 +67,10 @@ void AckermannDriveGuidance::purePursuit()
 	}
 
 	// Setup global frame variables
-	_curr_pos = {_vehicle_global_position.lat, _vehicle_global_position.lon};
-	_curr_wp = {_position_setpoint_triplet.current.lat, _position_setpoint_triplet.current.lon};
+	_curr_pos = Vector2d(_vehicle_global_position.lat, _vehicle_global_position.lon);
+	_curr_wp = Vector2d(_position_setpoint_triplet.current.lat, _position_setpoint_triplet.current.lon);
 	_next_wp = _curr_wp;
-	_prev_wp = {_home_position.lat, _home_position.lon};
+	_prev_wp = Vector2d(_home_position.lat, _home_position.lon);
 
 	if (_position_setpoint_triplet.previous.valid) {
 		_prev_wp(0) = _position_setpoint_triplet.previous.lat;
@@ -99,7 +83,7 @@ void AckermannDriveGuidance::purePursuit()
 	}
 
 	// Setup local frame variables
-	_curr_pos_local = {_local_position.x, _local_position.y};
+	_curr_pos_local = Vector2f(_local_position.x, _local_position.y);
 	_curr_wp_local = _global_local_proj_ref.project(_curr_wp(0), _curr_wp(1));
 	_prev_wp_local = _global_local_proj_ref.project(_prev_wp(0), _prev_wp(1));
 	_next_wp_local = _global_local_proj_ref.project(_next_wp(0), _next_wp(1));
@@ -125,7 +109,7 @@ void AckermannDriveGuidance::purePursuit()
 
 			if (distance_to_prev_wp <= _prev_acc_rad) { // Cornering speed
 				float cornering_speed = _param_ad_miss_vel_tun.get() / _prev_acc_rad;
-				_desired_speed = math::constrain<float>(cornering_speed, _param_ad_miss_vel_min.get(), _param_ad_miss_vel_def.get());
+				_desired_speed = math::constrain(cornering_speed, _param_ad_miss_vel_min.get(), _param_ad_miss_vel_def.get());
 
 			} else { // Default mission speed
 				_desired_speed = _param_ad_miss_vel_def.get();
@@ -194,7 +178,7 @@ void AckermannDriveGuidance::purePursuit()
 	_ackermann_drive_setpoint_pub.publish(_ackermann_drive_setpoint);
 }
 
-float AckermannDriveGuidance::calcDesiredHeading(Vector2f const &curr_wp_local, Vector2f const &prev_wp_local,
+float AckermannDriveGuidance::calcDesiredHeading(const Vector2f &curr_wp_local, const Vector2f &prev_wp_local,
 		Vector2f const &curr_pos_local,
 		float const &lookahead_distance)
 {
@@ -229,7 +213,7 @@ float AckermannDriveGuidance::calcDesiredHeading(Vector2f const &curr_wp_local, 
 		Vector2f distance2 = (curr_wp_local - curr_pos_local) - point2;
 
 		// Return intersection point closer to current waypoint
-		if (distance1.norm() < distance2.norm()) {
+		if (distance1.norm_squared() < distance2.norm_squared()) {
 			return atan2f(ay, ax);
 
 		} else {
@@ -238,8 +222,8 @@ float AckermannDriveGuidance::calcDesiredHeading(Vector2f const &curr_wp_local, 
 	}
 }
 
-void AckermannDriveGuidance::updateAcceptanceRadius(Vector2f const &curr_wp_local, Vector2f const &prev_wp_local,
-		Vector2f const &next_wp_local)
+void AckermannDriveGuidance::updateAcceptanceRadius(const Vector2f &curr_wp_local, const Vector2f &prev_wp_local,
+		const Vector2f &next_wp_local)
 {
 	// Setup variables
 	Vector2f curr_to_prev_wp_local = prev_wp_local - curr_wp_local;
