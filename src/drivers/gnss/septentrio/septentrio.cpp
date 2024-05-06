@@ -52,8 +52,10 @@
 #include <matrix/math.hpp>
 #include <px4_platform_common/defines.h>
 #include <px4_platform_common/time.h>
+#include <px4_platform_common/events.h>
 #include <uORB/topics/gps_inject_data.h>
 
+#include "uORB/topics/sensor_gps.h"
 #include "util.h"
 
 using namespace time_literals;
@@ -93,7 +95,9 @@ using namespace time_literals;
 
 #define SBF_CONFIG_RESET_COLD "ExeResetReceiver, hard, SatData\n"
 
-#define SBF_CONFIG "setSBFOutput, Stream1, %s, PVTGeodetic+VelCovGeodetic+DOP+AttEuler+AttCovEuler, msec100\n" /**< Configure the correct blocks for GPS positioning and heading */
+#define SBF_CONFIG "setSBFOutput, Stream1, %s, PVTGeodetic+VelCovGeodetic+DOP+AttEuler+AttCovEuler, msec100\n"      ///< Configure the correct blocks for GPS positioning and heading
+
+#define SBF_CONFIG_RESILIENCE "setSBFOutput, Stream2, %s, GalAuthStatus+RFStatus+QualityInd+ReceiverStatus, sec1\n" ///< Configure a stream with SBF blocks containing resilience information
 
 #define SBF_CONFIG_BAUDRATE "setCOMSettings, %s, baud%d\n"
 
@@ -676,6 +680,12 @@ int SeptentrioGPS::configure(float heading_offset)
 		return PX4_ERROR;
 	}
 
+	snprintf(msg, sizeof(msg), SBF_CONFIG_RESILIENCE, com_port);
+	if (!send_message_and_wait_for_ack(msg, SBF_CONFIG_TIMEOUT)) {
+		PX4_ERR("Failed to configure resilience");
+		return PX4_ERROR;
+	}
+
 	_configured = true;
 
 	return PX4_OK;
@@ -896,6 +906,91 @@ int SeptentrioGPS::payload_rx_done()
 		_rate_count_lat_lon++;
 		// NOTE: Isn't this just `ret |= (_msg_status == 7)`?
 		ret |= (_msg_status == 7) ? 1 : 0;
+		break;
+
+	case SBF_ID_ReceiverStatus: SBF_TRACE_RXMSG("Rx ReceiverStatus");
+		// NOTE: Maybe setting `_msg_status` is required.
+		if (_buf.payload_receiver_status.rx_error_cpu_overload && !(_report_gps_pos.system_error & sensor_gps_s::SYSTEM_ERROR_CPU_OVERLOAD))
+			events::send(events::ID("septentrio_problem_cpu_overload"), events::Log::Warning, "GPS receiver CPU overload");
+		if (_buf.payload_receiver_status.rx_error_antenna && !(_report_gps_pos.system_error & sensor_gps_s::SYSTEM_ERROR_ANTENNA))
+			events::send(events::ID("septentrio_problem_antenna"), events::Log::Warning, "GPS receiver antenna problem");
+		if (_buf.payload_receiver_status.rx_error_congestion && !(_report_gps_pos.system_error & sensor_gps_s::SYSTEM_ERROR_OUTPUT_CONGESTION))
+			events::send(events::ID("septentrio_problem_output_congestion"), events::Log::Warning, "GPS receiver output congestion");
+		if (_buf.payload_receiver_status.ext_error_diff_corr_error && !(_report_gps_pos.system_error & sensor_gps_s::SYSTEM_ERROR_INCOMING_CORRECTIONS))
+			events::send(events::ID("septentrio_problem_corrections_in"), events::Log::Warning, "GPS receiver faulty corrections input");
+		if (_buf.payload_receiver_status.rx_error_invalid_config && !(_report_gps_pos.system_error & sensor_gps_s::SYSTEM_ERROR_CONFIGURATION))
+			events::send(events::ID("septentrio_problem_configuration"), events::Log::Warning, "GPS receiver configuration problem");
+		if (_buf.payload_receiver_status.rx_error_software && !(_report_gps_pos.system_error & sensor_gps_s::SYSTEM_ERROR_SOFTWARE))
+			events::send(events::ID("septentrio_problem_software"), events::Log::Warning, "GPS receiver software problem");
+		if (_buf.payload_receiver_status.rx_error_missed_event && !(_report_gps_pos.system_error & sensor_gps_s::SYSTEM_ERROR_EVENT_CONGESTION))
+			events::send(events::ID("septentrio_problem_event_congestion"), events::Log::Warning, "GPS receiver event congestion");
+
+		_report_gps_pos.system_error = sensor_gps_s::SYSTEM_ERROR_OK;
+
+		if (_buf.payload_receiver_status.rx_error_cpu_overload)
+			_report_gps_pos.system_error |= sensor_gps_s::SYSTEM_ERROR_CPU_OVERLOAD;
+		if (_buf.payload_receiver_status.rx_error_antenna)
+			_report_gps_pos.system_error |= sensor_gps_s::SYSTEM_ERROR_ANTENNA;
+		if (_buf.payload_receiver_status.ext_error_diff_corr_error)
+			_report_gps_pos.system_error |= sensor_gps_s::SYSTEM_ERROR_INCOMING_CORRECTIONS;
+		if (_buf.payload_receiver_status.ext_error_setup_error)
+			_report_gps_pos.system_error |= sensor_gps_s::SYSTEM_ERROR_CONFIGURATION;
+		if (_buf.payload_receiver_status.rx_error_software)
+			_report_gps_pos.system_error |= sensor_gps_s::SYSTEM_ERROR_SOFTWARE;
+		if (_buf.payload_receiver_status.rx_error_congestion)
+			_report_gps_pos.system_error |= sensor_gps_s::SYSTEM_ERROR_OUTPUT_CONGESTION;
+		if (_buf.payload_receiver_status.rx_error_missed_event)
+			_report_gps_pos.system_error |= sensor_gps_s::SYSTEM_ERROR_EVENT_CONGESTION;
+
+		break;
+
+	case SBF_ID_RFStatus: SBF_TRACE_RXMSG("Rx RFStatus");
+		// NOTE: Maybe setting `_msg_status` is required.
+		_report_gps_pos.spoofing_state = sensor_gps_s::SPOOFING_STATE_NONE;
+		_report_gps_pos.jamming_state = sensor_gps_s::JAMMING_STATE_OK;
+		for (int i = 0; i < _buf.payload_rf_status.n; i++) {
+			// There are `n` sub-blocks of `sb_length` bytes. Use the size as an offset into the remainder of `_buf`.
+			sbf_payload_rf_status_rf_band_t* rf_band_data = reinterpret_cast<sbf_payload_rf_status_rf_band_t*>(&_buf.payload_rf_status.rf_band + i * _buf.payload_rf_status.sb_length);
+
+			switch (rf_band_data->info_mode) {
+			case 2:
+				_report_gps_pos.jamming_state = sensor_gps_s::JAMMING_STATE_CRITICAL;
+				_report_gps_pos.spoofing_state = sensor_gps_s::SPOOFING_STATE_INDICATED;
+				break;
+			case 8:
+				// As long as there is indicated but unmitigated spoofing in one band, don't report the overall state as mitigated
+				if (_report_gps_pos.spoofing_state == sensor_gps_s::SPOOFING_STATE_NONE) {
+					_report_gps_pos.jamming_state = sensor_gps_s::JAMMING_STATE_OK;
+					_report_gps_pos.spoofing_state = sensor_gps_s::SPOOFING_STATE_MITIGATED;
+				}
+			}
+		}
+
+		break;
+
+	case SBF_ID_GalAuthStatus: SBF_TRACE_RXMSG("Rx GalAuthStatus");
+		// NOTE: Maybe setting `_msg_status` is required.
+		switch (_buf.payload_gal_auth_status.osnma_status_status) {
+		case 0:
+			_report_gps_pos.authentication_state = sensor_gps_s::AUTHENTICATION_STATE_DISABLED;
+			break;
+		case 1:
+		case 2:
+			_report_gps_pos.authentication_state = sensor_gps_s::AUTHENTICATION_STATE_INITIALIZING;
+			break;
+		case 3:
+		case 4:
+		case 5:
+			_report_gps_pos.authentication_state = sensor_gps_s::AUTHENTICATION_STATE_FAILED;
+			break;
+		case 6:
+			_report_gps_pos.authentication_state = sensor_gps_s::AUTHENTICATION_STATE_OK;
+			break;
+		default:
+			_report_gps_pos.authentication_state = sensor_gps_s::AUTHENTICATION_STATE_UNKNOWN;
+			break;
+		}
+
 		break;
 
 	case SBF_ID_VelCovGeodetic: SBF_TRACE_RXMSG("Rx VelCovGeodetic");
