@@ -2,7 +2,6 @@
 #
 # @name Generic ackermann rover
 #
-#
 # @type Rover
 # @class Rover
 #
@@ -19,7 +18,7 @@ param set-default EKF2_ANGERR_INIT 0.01
 
 param set-default NAV_ACC_RAD 0.5 # Waypoint acceptance radius
 
-# Failsaves
+# Failsafes
 param set-default COM_FAIL_ACT_T 1 # Delay before failsafe after rc loss
 param set-default NAV_RCL_ACT 6 # Disarm on manual control loss
 
