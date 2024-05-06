@@ -89,7 +89,6 @@ private:
 	uORB::Subscription _manual_control_setpoint_sub{ORB_ID(manual_control_setpoint)};
 	uORB::Subscription _parameter_update_sub{ORB_ID(parameter_update)};
 	uORB::Subscription _vehicle_status_sub{ORB_ID(vehicle_status)};
-	vehicle_status_s _vehicle_status{};
 
 	// uORB publications
 	uORB::Publication<ackermann_drive_setpoint_s> _ackermann_drive_setpoint_pub{ORB_ID(ackermann_drive_setpoint)};
@@ -97,4 +96,7 @@ private:
 	// Instances
 	AckermannDriveControl _ackermann_drive_control{this};
 	AckermannDriveGuidance _ackermann_drive_guidance{this};
+
+	// Variables
+	int _nav_state{0};
 };

@@ -121,12 +121,7 @@ private:
 	uORB::Subscription _mission_result_sub{ORB_ID(mission_result)};
 	uORB::Subscription _position_controller_status_sub{ORB_ID(position_controller_status)};
 	position_setpoint_triplet_s _position_setpoint_triplet{};
-	vehicle_global_position_s _vehicle_global_position{};
 	vehicle_local_position_s _local_position{};
-	home_position_s _home_position{};
-	vehicle_attitude_s _vehicle_attitude{};
-	mission_result_s _mission_result{};
-	position_controller_status_s _position_controller_status{};
 
 	// uORB publications
 	uORB::Publication<ackermann_drive_setpoint_s> _ackermann_drive_setpoint_pub{ORB_ID(ackermann_drive_setpoint)};
@@ -151,6 +146,7 @@ private:
 	Vector2f _prev_wp_local{};
 	Vector2f _next_wp_local{};
 	float _prev_acc_rad{0.f};
+	bool _mission_finished{false};
 
 	// Parameters
 	DEFINE_PARAMETERS(

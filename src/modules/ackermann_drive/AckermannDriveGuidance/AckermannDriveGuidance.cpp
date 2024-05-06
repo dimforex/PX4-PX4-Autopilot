@@ -45,20 +45,26 @@ AckermannDriveGuidance::AckermannDriveGuidance(ModuleParams *parent) : ModulePar
 void AckermannDriveGuidance::purePursuit()
 {
 	// uORB subscriber updates
-	_position_controller_status_sub.update(&_position_controller_status);
-	_vehicle_global_position_sub.update(&_vehicle_global_position);
-	_home_position_sub.update(&_home_position);
 	_local_position_sub.update(&_local_position);
-	_mission_result_sub.update(&_mission_result);
+
+	if (_mission_result_sub.updated()) {
+		mission_result_s mission_result{};
+		_mission_result_sub.copy(&mission_result);
+		_mission_finished = mission_result.finished;
+	}
 
 	if (_position_setpoint_triplet_sub.updated()) {
-		_prev_acc_rad = _position_controller_status.acceptance_radius;
+		position_controller_status_s position_controller_status{};
+		_position_controller_status_sub.update(&position_controller_status);
+		_prev_acc_rad = position_controller_status.acceptance_radius;
 		_position_setpoint_triplet_sub.copy(&_position_setpoint_triplet);
 	}
 
-	if (_vehicle_attitude_sub.update(&_vehicle_attitude)) {
-		matrix::Quatf _vehicle_attitude_quaternion = Quatf(_vehicle_attitude.q);
-		_vehicle_yaw = matrix::Eulerf(_vehicle_attitude_quaternion).psi();
+	if (_vehicle_attitude_sub.updated()) {
+		vehicle_attitude_s vehicle_attitude{};
+		_vehicle_attitude_sub.copy(&vehicle_attitude);
+		matrix::Quatf vehicle_attitude_quaternion = Quatf(vehicle_attitude.q);
+		_vehicle_yaw = matrix::Eulerf(vehicle_attitude_quaternion).psi();
 	}
 
 	if (!_global_local_proj_ref.isInitialized()
@@ -67,19 +73,30 @@ void AckermannDriveGuidance::purePursuit()
 	}
 
 	// Setup global frame variables
-	_curr_pos = Vector2d(_vehicle_global_position.lat, _vehicle_global_position.lon);
+	if (_vehicle_global_position_sub.updated()) {
+		vehicle_global_position_s vehicle_global_position{};
+		_vehicle_global_position_sub.copy(&vehicle_global_position);
+		_curr_pos = Vector2d(vehicle_global_position.lat, vehicle_global_position.lon);
+	}
+
 	_curr_wp = Vector2d(_position_setpoint_triplet.current.lat, _position_setpoint_triplet.current.lon);
-	_next_wp = _curr_wp;
-	_prev_wp = Vector2d(_home_position.lat, _home_position.lon);
 
 	if (_position_setpoint_triplet.previous.valid) {
 		_prev_wp(0) = _position_setpoint_triplet.previous.lat;
 		_prev_wp(1) = _position_setpoint_triplet.previous.lon;
+
+	} else {
+		home_position_s home_position{};
+		_home_position_sub.update(&home_position);
+		_prev_wp = Vector2d(home_position.lat, home_position.lon);
 	}
 
 	if (_position_setpoint_triplet.next.valid) {
 		_next_wp(0) = _position_setpoint_triplet.next.lat;
 		_next_wp(1) = _position_setpoint_triplet.next.lon;
+
+	} else {
+		_next_wp = _curr_wp;
 	}
 
 	// Setup local frame variables
@@ -90,7 +107,7 @@ void AckermannDriveGuidance::purePursuit()
 	updateAcceptanceRadius(_curr_wp_local, _prev_wp_local, _next_wp_local);
 
 	// Stop at final waypoint
-	if (_mission_result.finished) {
+	if (_mission_finished) {
 		_currentState = GuidanceState::GOAL_REACHED;
 
 	} else {

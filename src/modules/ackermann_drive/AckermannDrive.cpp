@@ -66,10 +66,14 @@ void AckermannDrive::Run()
 		updateParams();
 	}
 
-	_vehicle_status_sub.update(&_vehicle_status);
+	if (_vehicle_status_sub.updated()) {
+		vehicle_status_s vehicle_status;
+		_vehicle_status_sub.copy(&vehicle_status);
+		_nav_state = vehicle_status.nav_state;
+	}
 
 	// Navigation modes
-	switch (_vehicle_status.nav_state) {
+	switch (_nav_state) {
 	case vehicle_status_s::NAVIGATION_STATE_MANUAL: // Manual mode
 		if (_manual_control_setpoint_sub.updated()) {
 			ackermann_drive_setpoint_s _ackermann_drive_setpoint{};
