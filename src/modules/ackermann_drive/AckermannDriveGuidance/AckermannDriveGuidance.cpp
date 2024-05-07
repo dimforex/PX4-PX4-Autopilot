@@ -86,9 +86,11 @@ void AckermannDriveGuidance::purePursuit()
 		_prev_wp(1) = _position_setpoint_triplet.previous.lon;
 
 	} else {
-		home_position_s home_position{};
-		_home_position_sub.update(&home_position);
-		_prev_wp = Vector2d(home_position.lat, home_position.lon);
+		if (_home_position_sub.updated()) {
+			home_position_s home_position{};
+			_home_position_sub.copy(&home_position);
+			_prev_wp = Vector2d(home_position.lat, home_position.lon);
+		}
 	}
 
 	if (_position_setpoint_triplet.next.valid) {
