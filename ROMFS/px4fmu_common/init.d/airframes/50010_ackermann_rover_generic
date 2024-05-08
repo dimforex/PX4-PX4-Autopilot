@@ -1,0 +1,26 @@
+#!/bin/sh
+#
+# @name Generic ackermann rover
+#
+# @type Rover
+# @class Rover
+#
+# @board px4_fmu-v2 exclude
+# @board bitcraze_crazyflie exclude
+#
+
+. ${R}etc/init.d/rc.rover_ackermann_defaults
+
+param set-default BAT1_N_CELLS 3
+
+param set-default EKF2_GBIAS_INIT 0.01
+param set-default EKF2_ANGERR_INIT 0.01
+
+param set-default NAV_ACC_RAD 0.5 # Waypoint acceptance radius
+
+# Failsafes
+param set-default COM_FAIL_ACT_T 1 # Delay before failsafe after rc loss
+param set-default NAV_RCL_ACT 6 # Disarm on manual control loss
+
+# Geometry
+param set-default AD_WHEEL_BASE 0.321
