@@ -61,8 +61,8 @@ using namespace matrix;
  * @brief Enum class for the different states of guidance.
  */
 enum class GuidanceState {
-	DRIVING, // The vehicle is currently driving.
-	GOAL_REACHED // The vehicle has reached its goal.
+	kDriving, // The vehicle is currently driving.
+	kGoalReached // The vehicle has reached its goal.
 };
 
 /**
@@ -131,7 +131,7 @@ private:
 	MapProjection _global_local_proj_ref{}; // Transform global to local coordinates.
 
 	// Rover variables
-	GuidanceState _currentState = GuidanceState::DRIVING; // Current state of guidance.
+	GuidanceState _currentState = GuidanceState::kDriving; // Current state of guidance.
 	Vector2d _curr_pos{};
 	Vector2f _curr_pos_local{};
 	float _vehicle_yaw{0.f};

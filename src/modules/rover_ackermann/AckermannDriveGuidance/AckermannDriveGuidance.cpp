@@ -110,15 +110,15 @@ void AckermannDriveGuidance::purePursuit()
 
 	// Stop at final waypoint
 	if (_mission_finished) {
-		_currentState = GuidanceState::GOAL_REACHED;
+		_currentState = GuidanceState::kGoalReached;
 
 	} else {
-		_currentState = GuidanceState::DRIVING;
+		_currentState = GuidanceState::kDriving;
 	}
 
 	// Guidance logic
 	switch (_currentState) {
-	case GuidanceState::DRIVING: {
+	case GuidanceState::kDriving: {
 			// Set rover speed
 			Vector2f rover_velocity = {_local_position.vx, _local_position.vy};
 			_ackermann_drive_setpoint.speed_actual = rover_velocity.norm();
@@ -182,7 +182,7 @@ void AckermannDriveGuidance::purePursuit()
 			break;
 		}
 
-	case GuidanceState::GOAL_REACHED:
+	case GuidanceState::kGoalReached:
 		// Stop the rover
 		_desired_steering = 0.f;
 		_desired_speed = 0.f;
