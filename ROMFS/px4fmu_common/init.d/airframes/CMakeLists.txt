@@ -149,7 +149,7 @@ if(CONFIG_MODULES_DIFFERENTIAL_DRIVE)
 	)
 endif()
 
-if(CONFIG_MODULES_ACKERMANN_DRIVE)
+if(CONFIG_MODULES_ROVER_ACKERMANN)
 	px4_add_romfs_files(
 		50010_ackermann_rover_generic
 	)

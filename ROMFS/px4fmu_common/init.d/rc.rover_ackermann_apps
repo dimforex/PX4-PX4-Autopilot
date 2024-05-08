@@ -5,7 +5,7 @@
 ekf2 start &
 
 # Start rover ackermann drive controller.
-ackermann_drive start
+rover_ackermann start
 
 # Start Land Detector.
 land_detector start rover

@@ -147,13 +147,13 @@ int AckermannDrive::print_usage(const char *reason)
 Rover state machine.
 )DESCR_STR");
 
-	PRINT_MODULE_USAGE_NAME("ackermann_drive", "controller");
+	PRINT_MODULE_USAGE_NAME("rover_ackermann", "controller");
 	PRINT_MODULE_USAGE_COMMAND("start");
 	PRINT_MODULE_USAGE_DEFAULT_COMMANDS();
 	return 0;
 }
 
-extern "C" __EXPORT int ackermann_drive_main(int argc, char *argv[])
+extern "C" __EXPORT int rover_ackermann_main(int argc, char *argv[])
 {
 	return AckermannDrive::main(argc, argv);
 }

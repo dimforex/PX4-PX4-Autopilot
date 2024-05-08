@@ -35,8 +35,8 @@ add_subdirectory(AckermannDriveControl)
 add_subdirectory(AckermannDriveGuidance)
 
 px4_add_module(
-	MODULE modules__ackermann_drive
-	MAIN ackermann_drive
+	MODULE modules__rover_ackermann
+	MAIN rover_ackermann
 	SRCS
 		AckermannDrive.cpp
 		AckermannDrive.hpp
